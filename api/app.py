@@ -5,7 +5,7 @@ import os
 
 # 將 ML 資料夾加入到 Python 路徑中
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from Ml.test import predict_game_result  # 導入預測函數
+from model import predict_game_result  # 導入預測函數
 
 app = Flask(__name__)
 CORS(app)
