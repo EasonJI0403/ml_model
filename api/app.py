@@ -1,3 +1,5 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import json
 from collections import defaultdict
 import numpy as np
@@ -5,16 +7,20 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from difflib import get_close_matches
 
+app = Flask(__name__)
+CORS(app)
+
 # 讀取數據函數
 def load_json(filename):
+    filepath = f'api/{filename}'
     try:
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"Warning: File {filename} not found. Skipping.")
+        print(f"Warning: File {filepath} not found. Skipping.")
         return []
     except json.JSONDecodeError:
-        print(f"Error: Unable to parse JSON in {filename}. Skipping.")
+        print(f"Error: Unable to parse JSON in {filepath}. Skipping.")
         return []
 
 # 讀取球員數據
@@ -38,8 +44,6 @@ all_player_data = p_player_data_23 + t1_player_data_23 + p_player_data_24 + t1_p
 all_team_data = p_team_data_23 + t1_team_data_23 + p_team_data_24 + t1_team_data_24
 all_season_data = t1_season_data + p_season_data
 
-
-
 # 建立球員位置字典
 position_dict = {player_data['player']: player_data['position'] for player_data in all_player_data}
 
@@ -62,7 +66,6 @@ weights = {
     }
 }
 
-# 計算球員得分
 def calculate_player_score(player_data):
     player_name = player_data['player']
     player_position = position_dict.get(player_name, 'G')
@@ -123,7 +126,6 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 clf = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
 clf.fit(X_train, y_train)
 
-# 模糊匹配函數
 def find_team(team_name, all_team_data):
     exact_match = next((team for team in all_team_data if team['team_name'] == team_name), None)
     if exact_match:
@@ -134,7 +136,6 @@ def find_team(team_name, all_team_data):
         return next(team for team in all_team_data if team['team_name'] == close_matches[0])
     return None
 
-# 預測函數
 def predict_game_result(team1, team2, is_home_team):
     print(f"Predicting result for: {team1} vs {team2}")
     print(f"Home team: {is_home_team}")
@@ -196,12 +197,14 @@ def predict_game_result(team1, team2, is_home_team):
            f"  {team2_name}預測得分: {team2_score_pred:.1f}\n" \
            f"  主場隊伍: {is_home_team}"
 
-# 測試預測
-print(predict_game_result("臺北富邦勇士", "新北國王", "新北國王"))
+# Flask routes
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({"message": "Welcome to the Basketball Prediction API"})
 
-from flask import Flask, request, jsonify
-
-app = Flask(__name__)
+@app.route('/api', methods=['GET'])
+def api_home():
+    return jsonify({"message": "API is running"})
 
 @app.route('/api/predict', methods=['POST'])
 def predict():
@@ -224,4 +227,6 @@ def health_check():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
+else:
+    app = app
