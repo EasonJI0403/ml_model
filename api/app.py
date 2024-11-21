@@ -14,10 +14,6 @@ CORS(app)
 def home():
     return jsonify({"message": "Welcome to the Basketball Prediction API"})
 
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    return jsonify({'status': 'healthy'})
-
 @app.route('/api/predict', methods=['POST'])
 def predict():
     try:
