@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from difflib import get_close_matches
 import pandas as pd
+import joblib
 
 # =====================
 # 1. 球隊名稱映射系統
@@ -536,6 +537,19 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     clf = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
     clf.fit(X_train, y_train)
+    
+    # 儲存訓練好的模型
+    joblib.dump(clf, 'model.pkl')
+    
+    model_data = {
+        'team_avg_points': team_avg_points,
+        'team_top_players': dict(team_top_players),  # 轉換 defaultdict 為一般 dict
+        'all_team_data': all_team_data
+    }
+    
+    with open('model_data.json', 'w', encoding='utf-8') as f:
+        json.dump(model_data, f, ensure_ascii=False, indent=4)
 
+    print("模型和數據已儲存")
 
 # print(predict_game_result("臺南台鋼獵鷹", "高雄鋼鐵人", "臺南台鋼獵鷹"))
