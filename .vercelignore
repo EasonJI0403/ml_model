@@ -1,5 +1,0 @@
-dataset/*        # 忽略 dataset 資料夾下的所有檔案
-crawler/*        # 忽略 crawler 資料夾下的所有檔案
-*.csv           # 忽略所有 .csv 結尾的檔案
-*.json          # 忽略所有 .json 結尾的檔案
-!api/*
